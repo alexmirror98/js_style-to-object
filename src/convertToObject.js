@@ -6,37 +6,20 @@
  * @return {object}
  */
 function convertToObject(styleString) {
-  if (typeof styleString !== 'string') {
-    return {};
-  }
-
   const result = {};
-  const lines = styleString
+
+  styleString
     .split(';')
-    .map((line) => line.replace(/\t/g, '').trim())
-    .filter(Boolean);
+    .map(rule => rule.trim())
+    .filter(rule => rule)
+    .forEach(rule => {
+      const colonIndex = rule.indexOf(':');
+      if (colonIndex === -1) return;
 
-  let currentProperty = null;
-  let currentValue = '';
-
-  for (const line of lines) {
-    if (line.includes(':')) {
-      if (currentProperty !== null) {
-        result[currentProperty] = currentValue;
-      }
-
-      const [prop, ...valueParts] = line.split(':');
-
-      currentProperty = prop.trim();
-      currentValue = valueParts.join(':').trim();
-    } else if (currentProperty !== null) {
-      currentValue += ';\n' + line;
-    }
-  }
-
-  if (currentProperty !== null) {
-    result[currentProperty] = currentValue;
-  }
+      const property = rule.slice(0, colonIndex).trim();
+      const value = rule.slice(colonIndex + 1).trim();
+      result[property] = value;
+    });
 
   return result;
 }
